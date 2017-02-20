@@ -29,8 +29,8 @@ function process() {
             })
         })
 
-        processList(stack, function () {
-            resolve()
+        processList(stack).then(function () {
+            resolve();
         })
 
     })
@@ -42,28 +42,12 @@ process().then(function () {
 
 
 function processList(stacklist,cb) {
-    var loop = true;
-    var isRunning = false;
-    var currentIndex = 0;
-    var totalIndexes = stacklist.length;
-    console.log('starting while')
+    var totalResolved = 0;
 
-
-    while(loop){
-        if (isRunning){
-            continue;
-        }
-
-        isRunning = true;
-        var s = stacklist[currentIndex];
-        var name = s.file;
-        s.process().then(function () {
-            ++currentIndex;
-            isRunning = false;
-
-            if (currentIndex === totalIndexes){
-                cb();
-            }
-        })
+    var p = stacklist[0].process();
+    for(var i = 1; i<stacklist.length; i++){
+        p.then(stacklist[i].process);
     }
+
+    return p;
 }
